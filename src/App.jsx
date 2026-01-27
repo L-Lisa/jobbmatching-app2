@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, X, ChevronDown, ChevronUp, Trash2, Briefcase, Star } from 'lucide-react';
+import { Search, Plus, X, ChevronDown, ChevronUp, Trash2, Briefcase, Star, Loader2 } from 'lucide-react';
+import { supabase } from './lib/supabase';
 
 // ============================================================================
 // CONFIGURATION
@@ -7,7 +8,6 @@ import { Search, Plus, X, ChevronDown, ChevronUp, Trash2, Briefcase, Star } from
 
 const CONFIG = {
   PASSWORD: 'demo123',
-  JOB_PREFIX: 'job:',
   TRUNCATE_LENGTH: 60,
   SUCCESS_DURATION: 3000,
 };
@@ -20,63 +20,7 @@ const INITIAL_FORM = {
   erfarenhet: '',
   utbildning: '',
   ovrigt: '',
-  ansvarigMatchare: '',
-};
-
-// ============================================================================
-// STORAGE HELPERS
-// ============================================================================
-
-const storage = {
-  isAvailable() {
-    try {
-      const test = '__test__';
-      localStorage.setItem(test, test);
-      localStorage.removeItem(test);
-      return true;
-    } catch {
-      return false;
-    }
-  },
-
-  getJobs() {
-    if (!this.isAvailable()) return [];
-    try {
-      const keys = Object.keys(localStorage).filter(k => k.startsWith(CONFIG.JOB_PREFIX));
-      return keys
-        .map(key => {
-          try {
-            return JSON.parse(localStorage.getItem(key));
-          } catch {
-            return null;
-          }
-        })
-        .filter(Boolean)
-        .sort((a, b) => b.timestamp - a.timestamp);
-    } catch {
-      return [];
-    }
-  },
-
-  saveJob(job) {
-    if (!this.isAvailable()) return false;
-    try {
-      localStorage.setItem(job.id, JSON.stringify(job));
-      return true;
-    } catch {
-      return false;
-    }
-  },
-
-  deleteJob(id) {
-    if (!this.isAvailable()) return false;
-    try {
-      localStorage.removeItem(id);
-      return true;
-    } catch {
-      return false;
-    }
-  },
+  ansvarig_matchare: '',
 };
 
 // ============================================================================
@@ -112,7 +56,7 @@ function LoginScreen({ onLogin }) {
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-xl mb-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-700 rounded-xl mb-4">
               <Briefcase className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-1">Jobbmatchning</h1>
@@ -129,7 +73,7 @@ function LoginScreen({ onLogin }) {
                   setError('');
                 }}
                 placeholder="Lösenord"
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                 autoFocus
               />
               {error && (
@@ -139,12 +83,24 @@ function LoginScreen({ onLogin }) {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-colors"
+              className="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-semibold transition-colors"
             >
               Logga in
             </button>
           </form>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Loading Screen
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+        <p className="text-slate-500">Laddar jobb...</p>
       </div>
     </div>
   );
@@ -160,7 +116,6 @@ function SuccessToast({ message, onClose }) {
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in">
       <div className="bg-white border border-green-200 rounded-xl shadow-lg px-5 py-4 flex items-center gap-3">
-        <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
         <span className="text-slate-700 font-medium">{message}</span>
         <button onClick={onClose} className="text-slate-400 hover:text-slate-600 ml-2">
           <X className="w-4 h-4" />
@@ -171,7 +126,7 @@ function SuccessToast({ message, onClose }) {
 }
 
 // Delete Confirmation Modal
-function DeleteModal({ onConfirm, onCancel }) {
+function DeleteModal({ onConfirm, onCancel, isDeleting }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
@@ -180,15 +135,24 @@ function DeleteModal({ onConfirm, onCancel }) {
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors"
+            disabled={isDeleting}
+            className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
           >
             Avbryt
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors"
+            disabled={isDeleting}
+            className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Radera
+            {isDeleting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Raderar...
+              </>
+            ) : (
+              'Radera'
+            )}
           </button>
         </div>
       </div>
@@ -196,7 +160,7 @@ function DeleteModal({ onConfirm, onCancel }) {
   );
 }
 
-// Form Field Component (defined outside to prevent re-creation)
+// Form Field Component
 function FormField({ label, field, required, multiline, value, error, onChange }) {
   return (
     <div>
@@ -211,7 +175,7 @@ function FormField({ label, field, required, multiline, value, error, onChange }
           className={`w-full px-4 py-2.5 border rounded-xl outline-none transition-all resize-none ${
             error
               ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-              : 'border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+              : 'border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
           }`}
         />
       ) : (
@@ -222,7 +186,7 @@ function FormField({ label, field, required, multiline, value, error, onChange }
           className={`w-full px-4 py-2.5 border rounded-xl outline-none transition-all ${
             error
               ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-              : 'border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+              : 'border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
           }`}
         />
       )}
@@ -232,7 +196,7 @@ function FormField({ label, field, required, multiline, value, error, onChange }
 }
 
 // Add Job Modal
-function AddJobModal({ onSubmit, onClose }) {
+function AddJobModal({ onSubmit, onClose, isSubmitting }) {
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
 
@@ -248,7 +212,7 @@ function AddJobModal({ onSubmit, onClose }) {
     if (!form.yrke.trim()) newErrors.yrke = 'Obligatoriskt fält';
     if (!form.lon.trim()) newErrors.lon = 'Obligatoriskt fält';
     if (!form.omfattning.trim()) newErrors.omfattning = 'Obligatoriskt fält';
-    if (!form.ansvarigMatchare.trim()) newErrors.ansvarigMatchare = 'Obligatoriskt fält';
+    if (!form.ansvarig_matchare.trim()) newErrors.ansvarig_matchare = 'Obligatoriskt fält';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -256,14 +220,7 @@ function AddJobModal({ onSubmit, onClose }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
-
-    const job = {
-      id: `${CONFIG.JOB_PREFIX}${Date.now()}`,
-      ...form,
-      timestamp: Date.now(),
-    };
-
-    onSubmit(job);
+    onSubmit(form);
   };
 
   return (
@@ -289,21 +246,30 @@ function AddJobModal({ onSubmit, onClose }) {
             <FormField label="Utbildning" field="utbildning" value={form.utbildning} error={errors.utbildning} onChange={handleChange} />
           </div>
           <FormField label="Övrigt" field="ovrigt" multiline value={form.ovrigt} error={errors.ovrigt} onChange={handleChange} />
-          <FormField label="Ansvarig matchare" field="ansvarigMatchare" required value={form.ansvarigMatchare} error={errors.ansvarigMatchare} onChange={handleChange} />
+          <FormField label="Ansvarig matchare" field="ansvarig_matchare" required value={form.ansvarig_matchare} error={errors.ansvarig_matchare} onChange={handleChange} />
 
           <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
               Avbryt
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2.5 bg-blue-700 text-white rounded-xl font-medium hover:bg-blue-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Lägg till
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Lägger till...
+                </>
+              ) : (
+                'Lägg till'
+              )}
             </button>
           </div>
         </form>
@@ -348,7 +314,7 @@ function JobTable({ jobs, onDelete }) {
     { key: 'erfarenhet', label: 'Erfarenhet' },
     { key: 'utbildning', label: 'Utbildning' },
     { key: 'ovrigt', label: 'Övrigt' },
-    { key: 'ansvarigMatchare', label: 'Ansvarig matchare' },
+    { key: 'ansvarig_matchare', label: 'Ansvarig matchare' },
   ];
 
   return (
@@ -405,7 +371,7 @@ function JobCard({ job, onDelete }) {
     { label: 'Erfarenhet', value: job.erfarenhet },
     { label: 'Utbildning', value: job.utbildning },
     { label: 'Övrigt', value: job.ovrigt },
-    { label: 'Ansvarig matchare', value: job.ansvarigMatchare },
+    { label: 'Ansvarig matchare', value: job.ansvarig_matchare },
   ];
 
   return (
@@ -472,7 +438,7 @@ function EmptyState({ onAddClick }) {
       <p className="text-slate-500 mb-6">Lägg till första jobbet</p>
       <button
         onClick={onAddClick}
-        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+        className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
       >
         <Plus className="w-5 h-5" />
         Lägg till jobb
@@ -499,17 +465,41 @@ function NoResults({ query }) {
 // ============================================================================
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('authenticated') === 'true';
+  });
   const [jobs, setJobs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteJobId, setDeleteJobId] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Load jobs from Supabase
+  const loadJobs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setJobs(data || []);
+    } catch (error) {
+      console.error('Error loading jobs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Load jobs on mount
   useEffect(() => {
-    setJobs(storage.getJobs());
-  }, []);
+    if (isAuthenticated) {
+      loadJobs();
+    }
+  }, [isAuthenticated]);
 
   // Filter jobs based on search
   const filteredJobs = useMemo(() => {
@@ -522,25 +512,64 @@ function App() {
     );
   }, [jobs, searchQuery]);
 
-  // Handlers
-  const handleAddJob = (job) => {
-    if (storage.saveJob(job)) {
-      setJobs(storage.getJobs());
+  // Add job handler
+  const handleAddJob = async (formData) => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .insert([formData]);
+
+      if (error) throw error;
+
+      await loadJobs();
       setShowAddModal(false);
       setShowSuccess(true);
+    } catch (error) {
+      console.error('Error adding job:', error);
+      alert('Kunde inte lägga till jobbet. Försök igen.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleDeleteJob = () => {
-    if (deleteJobId && storage.deleteJob(deleteJobId)) {
-      setJobs(storage.getJobs());
+  // Delete job handler
+  const handleDeleteJob = async () => {
+    if (!deleteJobId) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .delete()
+        .eq('id', deleteJobId);
+
+      if (error) throw error;
+
+      await loadJobs();
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      alert('Kunde inte radera jobbet. Försök igen.');
+    } finally {
+      setIsDeleting(false);
+      setDeleteJobId(null);
     }
-    setDeleteJobId(null);
+  };
+
+  // Login handler
+  const handleLogin = () => {
+    localStorage.setItem('authenticated', 'true');
+    setIsAuthenticated(true);
   };
 
   // Login screen
   if (!isAuthenticated) {
-    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+    return <LoginScreen onLogin={handleLogin} />;
+  }
+
+  // Loading screen
+  if (isLoading) {
+    return <LoadingScreen />;
   }
 
   // Main app
@@ -551,7 +580,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center">
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-xl font-bold text-slate-800">Lediga Jobb Listan</h1>
@@ -565,13 +594,13 @@ function App() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Sök på nyckelord"
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                 />
               </div>
 
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-4 py-2.5 rounded-xl font-medium transition-colors whitespace-nowrap"
               >
                 <Plus className="w-5 h-5" />
                 <span className="hidden sm:inline">Lägg till jobb</span>
@@ -614,6 +643,7 @@ function App() {
         <AddJobModal
           onSubmit={handleAddJob}
           onClose={() => setShowAddModal(false)}
+          isSubmitting={isSubmitting}
         />
       )}
 
@@ -621,6 +651,7 @@ function App() {
         <DeleteModal
           onConfirm={handleDeleteJob}
           onCancel={() => setDeleteJobId(null)}
+          isDeleting={isDeleting}
         />
       )}
 
