@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Plus, X, ChevronDown, ChevronUp, Trash2, Briefcase, Star, Loader2 } from 'lucide-react';
 import { supabase } from './lib/supabase';
+import DotGrid from './components/DotGrid';
 
 // ============================================================================
 // CONFIGURATION
@@ -52,11 +53,23 @@ function LoginScreen({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Interactive Dot Grid Background */}
+      <DotGrid 
+        dotSize={3}
+        dotColor="#4169E1"
+        dotOpacity={0.25}
+        dotSpacing={32}
+        shockRadius={120}
+        shockStrength={6}
+        returnDuration={1.5}
+      />
+      
+      {/* Login Card */}
+      <div className="w-full max-w-sm relative z-10">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200/50 p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4" style={{backgroundColor: '#4169E1'}}>
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4 shadow-lg" style={{backgroundColor: '#4169E1'}}>
               <Briefcase className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-1">Jobbmatchning</h1>
@@ -73,7 +86,7 @@ function LoginScreen({ onLogin }) {
                   setError('');
                 }}
                 placeholder="Lösenord"
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus-royal outline-none transition-all"
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus-royal outline-none transition-all bg-white"
                 autoFocus
               />
               {error && (
@@ -83,7 +96,7 @@ function LoginScreen({ onLogin }) {
 
             <button
               type="submit"
-              className="w-full text-white py-3 rounded-xl font-semibold transition-all hover:scale-[1.02]"
+              className="w-full text-white py-3 rounded-xl font-semibold transition-all hover:scale-[1.02] hover:shadow-lg"
               style={{backgroundColor: '#4169E1'}}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#3458c9'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4169E1'}
