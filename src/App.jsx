@@ -116,7 +116,7 @@ function LoginScreen({ onLogin }) {
               <Briefcase className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-1">Jobbmatchning</h1>
-            <p className="text-slate-500 text-sm">Ange lösenord för att fortsätta</p>
+            <p className="text-slate-500 text-sm">Ange lösenord för att fortsätta till sidan</p>
           </div>
 
           <form onSubmit={handleSubmit}>
