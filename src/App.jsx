@@ -56,7 +56,7 @@ function LoginScreen({ onLogin }) {
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 icon-box rounded-xl mb-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4" style={{backgroundColor: '#4169E1'}}>
               <Briefcase className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-1">Jobbmatchning</h1>
@@ -83,7 +83,10 @@ function LoginScreen({ onLogin }) {
 
             <button
               type="submit"
-              className="w-full btn-primary text-white py-3 rounded-xl font-semibold"
+              className="w-full text-white py-3 rounded-xl font-semibold transition-all hover:scale-[1.02]"
+              style={{backgroundColor: '#4169E1'}}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#3458c9'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4169E1'}
             >
               Logga in
             </button>
@@ -260,7 +263,8 @@ function AddJobModal({ onSubmit, onClose, isSubmitting }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 text-white rounded-xl font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+              style={{backgroundColor: '#4169E1'}}
             >
               {isSubmitting ? (
                 <>
@@ -438,7 +442,8 @@ function EmptyState({ onAddClick }) {
       <p className="text-slate-500 mb-6">Lägg till första jobbet</p>
       <button
         onClick={onAddClick}
-        className="inline-flex items-center gap-2 btn-primary text-white px-5 py-2.5 rounded-xl font-medium"
+        className="inline-flex items-center gap-2 text-white px-5 py-2.5 rounded-xl font-medium transition-all hover:scale-[1.02] hover:shadow-lg"
+        style={{backgroundColor: '#4169E1'}}
       >
         <Plus className="w-5 h-5" />
         Lägg till jobb
@@ -580,7 +585,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 icon-box rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{backgroundColor: '#4169E1'}}>
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-xl font-bold text-slate-800">Lediga Jobb Listan</h1>
@@ -600,7 +605,8 @@ function App() {
 
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 btn-primary text-white px-4 py-2.5 rounded-xl font-medium whitespace-nowrap"
+                className="flex items-center gap-2 text-white px-4 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all hover:scale-[1.02] hover:shadow-lg"
+                style={{backgroundColor: '#4169E1'}}
               >
                 <Plus className="w-5 h-5" />
                 <span className="hidden sm:inline">Lägg till jobb</span>
