@@ -56,7 +56,7 @@ function LoginScreen({ onLogin }) {
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-700 rounded-xl mb-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-royal-500 rounded-xl mb-4">
               <Briefcase className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-1">Jobbmatchning</h1>
@@ -73,7 +73,7 @@ function LoginScreen({ onLogin }) {
                   setError('');
                 }}
                 placeholder="Lösenord"
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-royal-500 focus:ring-2 focus:ring-royal-500/20 outline-none transition-all"
                 autoFocus
               />
               {error && (
@@ -83,7 +83,7 @@ function LoginScreen({ onLogin }) {
 
             <button
               type="submit"
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-semibold transition-colors"
+              className="w-full bg-royal-500 hover:bg-royal-600 text-white py-3 rounded-xl font-semibold transition-colors"
             >
               Logga in
             </button>
@@ -99,7 +99,7 @@ function LoadingScreen() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="text-center">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+        <Loader2 className="w-8 h-8 text-royal-500 animate-spin mx-auto mb-4" />
         <p className="text-slate-500">Laddar jobb...</p>
       </div>
     </div>
@@ -175,7 +175,7 @@ function FormField({ label, field, required, multiline, value, error, onChange }
           className={`w-full px-4 py-2.5 border rounded-xl outline-none transition-all resize-none ${
             error
               ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-              : 'border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
+              : 'border-slate-300 focus:border-royal-500 focus:ring-2 focus:ring-royal-500/20'
           }`}
         />
       ) : (
@@ -186,7 +186,7 @@ function FormField({ label, field, required, multiline, value, error, onChange }
           className={`w-full px-4 py-2.5 border rounded-xl outline-none transition-all ${
             error
               ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-              : 'border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
+              : 'border-slate-300 focus:border-royal-500 focus:ring-2 focus:ring-royal-500/20'
           }`}
         />
       )}
@@ -260,7 +260,7 @@ function AddJobModal({ onSubmit, onClose, isSubmitting }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2.5 bg-blue-700 text-white rounded-xl font-medium hover:bg-blue-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 bg-royal-500 text-white rounded-xl font-medium hover:bg-royal-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -291,7 +291,7 @@ function ExpandableCell({ text }) {
       {needsTruncate && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="ml-1 text-blue-600 hover:text-blue-800 inline-flex items-center"
+          className="ml-1 text-royal-500 hover:text-royal-600 inline-flex items-center"
         >
           {expanded ? (
             <ChevronUp className="w-4 h-4" />
@@ -408,7 +408,7 @@ function JobCard({ job, onDelete }) {
 
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-3 w-full flex items-center justify-center gap-1 text-sm text-blue-600 hover:text-blue-800 py-2 border-t border-slate-100"
+          className="mt-3 w-full flex items-center justify-center gap-1 text-sm text-royal-500 hover:text-royal-600 py-2 border-t border-slate-100"
         >
           {expanded ? (
             <>
@@ -431,14 +431,14 @@ function JobCard({ job, onDelete }) {
 function EmptyState({ onAddClick }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
-      <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-4">
-        <Briefcase className="w-8 h-8 text-blue-600" />
+      <div className="inline-flex items-center justify-center w-16 h-16 bg-royal-500/10 rounded-full mb-4">
+        <Briefcase className="w-8 h-8 text-royal-500" />
       </div>
       <h3 className="text-lg font-semibold text-slate-800 mb-2">Inga jobb än</h3>
       <p className="text-slate-500 mb-6">Lägg till första jobbet</p>
       <button
         onClick={onAddClick}
-        className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+        className="inline-flex items-center gap-2 bg-royal-500 hover:bg-royal-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
       >
         <Plus className="w-5 h-5" />
         Lägg till jobb
@@ -580,7 +580,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-royal-500 rounded-xl flex items-center justify-center">
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-xl font-bold text-slate-800">Lediga Jobb Listan</h1>
@@ -594,13 +594,13 @@ function App() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Sök på nyckelord"
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl focus:border-royal-500 focus:ring-2 focus:ring-royal-500/20 outline-none transition-all"
                 />
               </div>
 
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-4 py-2.5 rounded-xl font-medium transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 bg-royal-500 hover:bg-royal-600 text-white px-4 py-2.5 rounded-xl font-medium transition-colors whitespace-nowrap"
               >
                 <Plus className="w-5 h-5" />
                 <span className="hidden sm:inline">Lägg till jobb</span>
