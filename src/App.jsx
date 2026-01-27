@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, X, ChevronDown, ChevronUp, Trash2, Briefcase, Star, Loader2 } from 'lucide-react';
+import { Search, Plus, X, ChevronDown, ChevronUp, Trash2, Briefcase, Star, Loader2, LogOut } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import DotGrid from './components/DotGrid';
 
@@ -580,6 +580,12 @@ function App() {
     setIsAuthenticated(true);
   };
 
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem('authenticated');
+    setIsAuthenticated(false);
+  };
+
   // Login screen
   if (!isAuthenticated) {
     return <LoginScreen onLogin={handleLogin} />;
@@ -592,7 +598,7 @@ function App() {
 
   // Main app
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -630,7 +636,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1">
         {jobs.length === 0 ? (
           <EmptyState onAddClick={() => setShowAddModal(true)} />
         ) : filteredJobs.length === 0 ? (
@@ -681,6 +687,19 @@ function App() {
           onClose={() => setShowSuccess(false)}
         />
       )}
+
+      {/* Footer with Logout */}
+      <footer className="border-t border-slate-200 bg-white mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-center">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors text-sm"
+          >
+            <LogOut className="w-4 h-4" />
+            Logga ut
+          </button>
+        </div>
+      </footer>
 
       {/* Animation and UX styles */}
       <style>{`
