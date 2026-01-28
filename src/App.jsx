@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Plus, X, ChevronDown, ChevronUp, Trash2, Briefcase, Star, Loader2, LogOut } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import DotGrid from './components/DotGrid';
+import findMatchingCandidates from './utils/matchCandidates';
 
 // ============================================================================
 // CONFIGURATION
@@ -295,6 +296,21 @@ function AddJobModal({ onSubmit, onClose, isSubmitting }) {
   );
 }
 
+// Match Display Component
+function MatchDisplay({ job }) {
+  const matches = findMatchingCandidates(job);
+  
+  if (matches.length === 0) return null;
+  
+  return (
+    <div className="text-sm py-2 px-4 bg-amber-50 border-t border-amber-100">
+      <span className="text-amber-700 font-medium">
+        ⭐ Föreslagen matchning: {matches.join(', ')}
+      </span>
+    </div>
+  );
+}
+
 // Expandable Cell (for table)
 function ExpandableCell({ text }) {
   const [expanded, setExpanded] = useState(false);
@@ -334,6 +350,8 @@ function JobTable({ jobs, onDelete }) {
     { key: 'ansvarig_matchare', label: 'Ansvarig matchare' },
   ];
 
+  const totalColumns = columns.length + 1; // +1 for delete button column
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
       <div className="overflow-x-auto">
@@ -354,24 +372,38 @@ function JobTable({ jobs, onDelete }) {
             </tr>
           </thead>
           <tbody>
-            {jobs.map((job, index) => (
-              <tr key={job.id} className={`row-hover ${index % 2 === 1 ? 'bg-slate-50/50' : ''}`}>
-                {columns.map((col) => (
-                  <td key={col.key} className="px-4 py-3 text-sm align-top">
-                    <ExpandableCell text={job[col.key]} />
-                  </td>
-                ))}
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => onDelete(job.id)}
-                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all btn-delete"
-                    title="Radera"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {jobs.map((job, index) => {
+              const matches = findMatchingCandidates(job);
+              return (
+                <React.Fragment key={job.id}>
+                  <tr className={`row-hover ${index % 2 === 1 ? 'bg-slate-50/50' : ''}`}>
+                    {columns.map((col) => (
+                      <td key={col.key} className="px-4 py-3 text-sm align-top">
+                        <ExpandableCell text={job[col.key]} />
+                      </td>
+                    ))}
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => onDelete(job.id)}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all btn-delete"
+                        title="Radera"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                  {matches.length > 0 && (
+                    <tr className={index % 2 === 1 ? 'bg-slate-50/50' : ''}>
+                      <td colSpan={totalColumns} className="px-4 py-2 border-t border-amber-100 bg-amber-50/50">
+                        <span className="text-sm text-amber-700 font-medium">
+                          ⭐ Föreslagen matchning: {matches.join(', ')}
+                        </span>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -382,6 +414,7 @@ function JobTable({ jobs, onDelete }) {
 // Job Card (Mobile)
 function JobCard({ job, onDelete }) {
   const [expanded, setExpanded] = useState(false);
+  const matches = findMatchingCandidates(job);
 
   const details = [
     { label: 'Omfattning', value: job.omfattning },
@@ -440,6 +473,15 @@ function JobCard({ job, onDelete }) {
           )}
         </button>
       </div>
+      
+      {/* Match Display */}
+      {matches.length > 0 && (
+        <div className="px-4 py-2 bg-amber-50 border-t border-amber-100">
+          <span className="text-sm text-amber-700 font-medium">
+            ⭐ Föreslagen matchning: {matches.join(', ')}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
