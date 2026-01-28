@@ -296,17 +296,26 @@ function AddJobModal({ onSubmit, onClose, isSubmitting }) {
   );
 }
 
-// Match Display Component
-function MatchDisplay({ job }) {
-  const matches = findMatchingCandidates(job);
+// Expandable Match Display Component
+function ExpandableMatchDisplay({ matches, className = "" }) {
+  const [expanded, setExpanded] = useState(false);
   
   if (matches.length === 0) return null;
   
   return (
-    <div className="text-sm py-2 px-4 bg-amber-50 border-t border-amber-100">
-      <span className="text-amber-700 font-medium">
-        ⭐ Föreslagen matchning: {matches.join(', ')}
-      </span>
+    <div className={className}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1 text-amber-700 font-medium text-sm w-full text-left hover:text-amber-800 transition-colors"
+      >
+        <span>⭐ Föreslagen matchning:</span>
+        <span className="ml-1">{expanded ? '🔽' : '▶️'}</span>
+      </button>
+      {expanded && (
+        <div className="mt-1 text-sm text-amber-700 pl-6">
+          {matches.join(', ')}
+        </div>
+      )}
     </div>
   );
 }
@@ -396,9 +405,7 @@ function JobTable({ jobs, onDelete }) {
                   {matches.length > 0 && (
                     <tr className={isEven ? 'bg-white' : 'bg-slate-100'}>
                       <td colSpan={totalColumns} className="px-6 py-2 bg-amber-50 border-l-4 border-l-amber-400">
-                        <span className="text-sm text-amber-700 font-medium">
-                          ⭐ Föreslagen matchning: {matches.join(', ')}
-                        </span>
+                        <ExpandableMatchDisplay matches={matches} />
                       </td>
                     </tr>
                   )}
@@ -482,9 +489,7 @@ function JobCard({ job, onDelete, isEven }) {
       {/* Match Display */}
       {matches.length > 0 && (
         <div className="px-4 py-3 bg-amber-50 border-l-4 border-l-amber-400">
-          <span className="text-sm text-amber-700 font-medium">
-            ⭐ Föreslagen matchning: {matches.join(', ')}
-          </span>
+          <ExpandableMatchDisplay matches={matches} />
         </div>
       )}
     </div>
