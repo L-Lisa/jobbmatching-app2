@@ -374,9 +374,10 @@ function JobTable({ jobs, onDelete }) {
           <tbody>
             {jobs.map((job, index) => {
               const matches = findMatchingCandidates(job);
+              const isEven = index % 2 === 0;
               return (
                 <React.Fragment key={job.id}>
-                  <tr className={`row-hover ${index % 2 === 1 ? 'bg-slate-50/50' : ''}`}>
+                  <tr className={`row-hover ${isEven ? 'bg-white' : 'bg-slate-100'}`}>
                     {columns.map((col) => (
                       <td key={col.key} className="px-4 py-3 text-sm align-top">
                         <ExpandableCell text={job[col.key]} />
@@ -393,14 +394,18 @@ function JobTable({ jobs, onDelete }) {
                     </td>
                   </tr>
                   {matches.length > 0 && (
-                    <tr className={index % 2 === 1 ? 'bg-slate-50/50' : ''}>
-                      <td colSpan={totalColumns} className="px-4 py-2 border-t border-amber-100 bg-amber-50/50">
+                    <tr className={isEven ? 'bg-white' : 'bg-slate-100'}>
+                      <td colSpan={totalColumns} className="px-6 py-2 bg-amber-50 border-l-4 border-l-amber-400">
                         <span className="text-sm text-amber-700 font-medium">
                           ⭐ Föreslagen matchning: {matches.join(', ')}
                         </span>
                       </td>
                     </tr>
                   )}
+                  {/* Spacer row between job groups */}
+                  <tr>
+                    <td colSpan={totalColumns} className="h-2 bg-slate-200/50"></td>
+                  </tr>
                 </React.Fragment>
               );
             })}
@@ -412,7 +417,7 @@ function JobTable({ jobs, onDelete }) {
 }
 
 // Job Card (Mobile)
-function JobCard({ job, onDelete }) {
+function JobCard({ job, onDelete, isEven }) {
   const [expanded, setExpanded] = useState(false);
   const matches = findMatchingCandidates(job);
 
@@ -425,7 +430,7 @@ function JobCard({ job, onDelete }) {
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div className={`rounded-xl shadow-sm border border-slate-200 overflow-hidden ${isEven ? 'bg-white' : 'bg-slate-100'}`}>
       <div className="p-4">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-semibold text-slate-800 text-lg">{job.yrke || '-'}</h3>
@@ -476,7 +481,7 @@ function JobCard({ job, onDelete }) {
       
       {/* Match Display */}
       {matches.length > 0 && (
-        <div className="px-4 py-2 bg-amber-50 border-t border-amber-100">
+        <div className="px-4 py-3 bg-amber-50 border-l-4 border-l-amber-400">
           <span className="text-sm text-amber-700 font-medium">
             ⭐ Föreslagen matchning: {matches.join(', ')}
           </span>
@@ -692,8 +697,8 @@ function App() {
 
             {/* Mobile Cards */}
             <div className="lg:hidden space-y-4">
-              {filteredJobs.map(job => (
-                <JobCard key={job.id} job={job} onDelete={setDeleteJobId} />
+              {filteredJobs.map((job, index) => (
+                <JobCard key={job.id} job={job} onDelete={setDeleteJobId} isEven={index % 2 === 0} />
               ))}
             </div>
 
